@@ -1,27 +1,23 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # pylint: disable=W0613, C0116
 # type: ignore[union-attr]
 # This program is dedicated to the public domain under the CC0 license.
 
 """
-Simple Bot to reply to Telegram messages.
+Simple Bot to feed clock with emojis and messages.
+TODO !!!
+We need to add account limits here !!!!
+Need to move Telegram Token to config file together with accounts
 
-First, a few handler functions are defined. Then, those functions are passed to
-the Dispatcher and registered at their respective places.
-Then, the bot is started and runs until we press Ctrl-C on the command line.
-
-Usage:
-Basic Echobot example, repeats messages.
 Press Ctrl-C on the command line or send a signal to the process to stop the
 bot.
 """
 
 import logging
-import redis
-import base64
-import re
 import json
+import re
+import redis
 
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
@@ -51,18 +47,16 @@ def help_command(update: Update, context: CallbackContext) -> None:
 def echo(update: Update, context: CallbackContext) -> None:
     """Echo the user message."""
     emoji = str(update.message.text.encode("unicode_escape"))
-    emoji = emoji.replace('\\\\','\+')
-    message = emoji.replace('\\\\','\+')
+    emoji = emoji.replace('\\\\', '+')
+    message = emoji.replace('\\\\', '+')
     emoji = emoji.lower()
     emojis = re.findall(r'(?:\+u)[a-z0-9]{8}', emoji)
-    message = re.sub(r'(?:\+U)[a-z0-9]{8}',r'', message)
-    message = re.sub(r'\\',r'', message)
-    message = re.sub(r'^b\'',r'', message)
-    message = re.sub(r'\'$',r'', message)
-    message = re.sub(r'^\s+',r'', message)
-    message = re.sub(r'\s+$',r'', message)
-    print(emojis)
-    print(message)
+    message = re.sub(r'(?:\+U)[a-z0-9]{8}', r'', message)
+    message = re.sub(r'\\', r'', message)
+    message = re.sub(r'^b\'', r'', message)
+    message = re.sub(r'\'$', r'', message)
+    message = re.sub(r'^\s+', r'', message)
+    message = re.sub(r'\s+$', r'', message)
     redis.set('message', message)
     redis.set('emoji', json.dumps(emojis))
     update.message.reply_text("ok")
@@ -73,7 +67,8 @@ def main():
     # Create the Updater and pass it your bot's token.
     # Make sure to set use_context=True to use the new context based callbacks
     # Post version 12 this will no longer be necessary
-    updater = Updater("1470465087:AAFC_Z5Flxr6TjxIDgctOvkCF9UMd4T8cWc", use_context=True)
+    updater = Updater(
+        "1470465087:AAFC_Z5Flxr6TjxIDgctOvkCF9UMd4T8cWc", use_context=True)
 
     # Get the dispatcher to register handlers
     dispatcher = updater.dispatcher
@@ -83,7 +78,8 @@ def main():
     dispatcher.add_handler(CommandHandler("help", help_command))
 
     # on noncommand i.e message - echo the message on Telegram
-    dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, echo))
+    dispatcher.add_handler(MessageHandler(
+        Filters.text & ~Filters.command, echo))
 
     # Start the Bot
     updater.start_polling()
