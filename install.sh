@@ -20,7 +20,6 @@ say () {
 #pip3 install python-telegram-bot
 
 run "useradd -r telegram"
-run "useradd -r clock"
 run "useradd -r temp"
 
 cat <<EOF > /etc/systemd/system/telegram.service
@@ -51,7 +50,7 @@ After=network.target
 Type=simple
 Environment=HOME=/opt/piPixelClock
 WorkingDirectory=/opt/piPixelClock
-User=clock
+User=root
 Nice=1
 TimeoutSec=300
 ExecStart=python clock.py > /dev/null 2>&1
@@ -73,7 +72,7 @@ WorkingDirectory=/opt/piPixelClock
 User=temp
 Nice=1
 TimeoutSec=300
-ExecStart=python3 bot.py
+ExecStart=python3 temp.py
 Restart=always
 RestartSec=10
 [Install]
