@@ -70,7 +70,7 @@ tick = True
 scroller = 64
 tscroller = 64
 nralerts = 0
-maxalerts = 3
+maxalerts = 2
 
 redis = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
 
@@ -82,7 +82,7 @@ GRAY = graphics.Color(128, 128, 128)
 RED = graphics.Color(255, 0, 0)
 GREEN = graphics.Color(0, 255, 0)
 BLUE = graphics.Color(0, 0, 255)
-YELLOW = graphics.Color(245, 190, 59)
+YELLOW = graphics.Color(255, 255, 0)
 PURPLE = graphics.Color(255, 0, 255)
 
 lastDateFlip = int(round(time.time() * 1000))
@@ -91,9 +91,13 @@ lastScrollTick = int(round(time.time() * 1000))
 
 fonts = {}
 
-loadFont('hack16')
-loadFont('hack18')
-loadFont('hack8')
+loadFont('c64_9')
+loadFont('c64_5')
+loadFont('c64_6')
+loadFont('c64_7')
+loadFont('c64_16')
+loadFont('c64_11')
+loadFont('c64_10')
 
 # boot msg
 telegram = ""
@@ -103,19 +107,15 @@ sizeoftelegram = len(telegram)*7
 MyOffsetCanvas = MyMatrix.CreateFrameCanvas()
 while(1):
     currentDT = datetime.datetime.now()
+    time.sleep(0.05)
 
-    if currentDT.hour < 23:
-        time.sleep(0.05)
-        scrollColour = BLUE
-        fulldate = currentDT.strftime("%d-%m-%y  %A")
-        if currentDT.day < 10:
-            fulldate = fulldate[1:]
-    else:
-        time.sleep(0.025)
-        scrollColour = PURPLE
-        fulldate = "GO HOME!!!"
+#    if currentDT.hour < 23:
+#        scrollColour = BLUE
+        #fulldate = currentDT.strftime("%d-%m-%y  %A")
+        #if currentDT.day < 10:
+        #    fulldate = fulldate[1:]
 
-    sizeofdate = len(fulldate)*7
+#    sizeofdate = len(fulldate)*7
 
     Millis = int(round(time.time() * 1000))
 
@@ -139,46 +139,56 @@ while(1):
         if nralerts <= maxalerts:
             alert(MyMatrix, emojis)
             nralerts = nralerts + 1
-        sizeoftelegram = len(telegram)*16
+        sizeoftelegram = len(telegram)*22
         tscroller = 64
 
-    thetime = currentDT.strftime("%H"+(":" if tick else " ")+"%M")
-    thetime = str.lstrip(thetime)
-    sizeoftime = (21 - (len(thetime) * 9) / 2)
+    thetimea = currentDT.strftime("%H")
+    thetimeb = currentDT.strftime("%M")
+    thetick = ":" if tick else " "
+    sizeoftick = 26
+    thetick = str.lstrip(thetick)
+    thetimea = str.lstrip(thetimea)
+    thetimeb = str.lstrip(thetimeb)
+    sizeoftimea = -1
+    sizeoftimeb = 34
 
-    thedate = currentDT.strftime("%d-%m-%y")
+    thedate = currentDT.strftime("%d-%m")
     thedate = str.lstrip(thedate)
-    sizeofdate = (40 - (len(thedate) * 9) / 2)
 
-    line = '-------'
-    sizeofline = (38 - (len(line) * 9) / 2)
+    line = '------'
 
     thetmpinside = '20c  in'
-    sizeoftmpinside = (38 - (len(thetmpinside) * 9) / 2)
 
-    thetmpoutside = '13c out'
-    sizeoftmpoutside = (38 - (len(thetmpoutside) * 9) / 2)
-
-    pmam = currentDT.strftime("%p")
+    tmpoutside = redis.get('temp_outside')
+    thetmpoutside = tmpoutside + 'c out'
 
     if nralerts < maxalerts:
-        graphics.DrawText(MyOffsetCanvas, fonts['hack18'], tscroller, 58,
+        graphics.DrawText(MyOffsetCanvas, fonts['c64_16'], tscroller, 56,
                           RED, telegram.decode('utf8'))
     if nralerts >= maxalerts:
-        graphics.DrawText(MyOffsetCanvas, fonts['hack8'], sizeofline, 41,
+        graphics.DrawText(MyOffsetCanvas, fonts['c64_7'], 2, 36,
                           RED, line)
 
-        graphics.DrawText(MyOffsetCanvas, fonts['hack8'], sizeoftmpinside, 50,
+        graphics.DrawText(MyOffsetCanvas, fonts['c64_6'], 4, 42,
                           WHITE, thetmpinside)
 
-        graphics.DrawText(MyOffsetCanvas, fonts['hack8'], sizeoftmpoutside, 60,
+        graphics.DrawText(MyOffsetCanvas, fonts['c64_6'], 4, 52,
+                          GRAY, thetmpoutside)
+        
+        graphics.DrawText(MyOffsetCanvas, fonts['c64_6'], 4, 62,
                           GRAY, thetmpoutside)
 
-    graphics.DrawText(MyOffsetCanvas, fonts['hack8'], sizeofdate, 32, GREEN,
+    graphics.DrawText(MyOffsetCanvas, fonts['c64_7'], 7, 27, GREEN,
                       thedate)
 
-    graphics.DrawText(MyOffsetCanvas, fonts['hack16'], sizeoftime, 20, YELLOW,
-                      thetime)
+    graphics.DrawText(MyOffsetCanvas, fonts['c64_11'], sizeoftimea, 15, YELLOW,
+                      thetimea)
+    
+    graphics.DrawText(MyOffsetCanvas, fonts['c64_10'], sizeoftick, 15, RED,
+                      thetick)
+    
+    graphics.DrawText(MyOffsetCanvas, fonts['c64_11'], sizeoftimeb, 15, YELLOW,
+                      thetimeb)
 
     MyOffsetCanvas = MyMatrix.SwapOnVSync(MyOffsetCanvas)
     MyOffsetCanvas.Clear()
