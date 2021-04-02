@@ -79,6 +79,25 @@ RestartSec=10
 WantedBy=multi-user.target
 EOF
 
+cat <<EOF > /etc/systemd/system/temp-loxone.service
+[Unit]
+Description=temp-loxone service
+Wants=network.target
+After=network.target
+[Service]
+Type=simple
+Environment=HOME=/opt/piPixelClock
+WorkingDirectory=/opt/piPixelClock
+User=temp
+Nice=1
+TimeoutSec=300
+ExecStart=python3 temp_loxone.py
+Restart=always
+RestartSec=10
+[Install]
+WantedBy=multi-user.target
+EOF
+
 say "Configure systemd"
 run "systemctl daemon-reload"
 run "systemctl enable redis"
@@ -87,5 +106,7 @@ run "systemctl enable telegram"
 run "systemctl restart telegram"
 run "systemctl enable temp"
 run "systemctl restart temp"
+run "systemctl enable temp-loxone"
+run "systemctl restart temp-loxone"
 run "systemctl enable clock"
 run "systemctl restart clock"

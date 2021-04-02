@@ -144,6 +144,7 @@ while(1):
 
     thetimea = currentDT.strftime("%H")
     thetimeb = currentDT.strftime("%M")
+    secs = int(currentDT.strftime("%S"))
     thetick = ":" if tick else " "
     sizeoftick = 26
     thetick = str.lstrip(thetick)
@@ -157,10 +158,19 @@ while(1):
 
     line = '------'
 
-    thetmpinside = '20c  in'
+    thetmpoutside = redis.get('temp_outside') + 'c out'
+    
+    thewind = redis.get('wind')
 
-    tmpoutside = redis.get('temp_outside')
-    thetmpoutside = tmpoutside + 'c out'
+    select = secs %4
+    if select == 0:
+      thetmpinside = redis.get('temp_workshop') + 'c wrk'
+    elif select == 1:
+      thetmpinside = redis.get('temp_office') + 'c off'
+    elif select == 2:
+      thetmpinside = redis.get('temp_lab') + 'c lab'
+    elif select == 3:
+      thetmpinside = redis.get('temp_kitchen') + 'c kit'
 
     if nralerts < maxalerts:
         graphics.DrawText(MyOffsetCanvas, fonts['c64_16'], tscroller, 56,
@@ -170,13 +180,13 @@ while(1):
                           RED, line)
 
         graphics.DrawText(MyOffsetCanvas, fonts['c64_6'], 4, 42,
-                          WHITE, thetmpinside)
+                          WHITE, thetmpoutside)
 
         graphics.DrawText(MyOffsetCanvas, fonts['c64_6'], 4, 52,
-                          GRAY, thetmpoutside)
+                          GRAY, thetmpinside)
         
         graphics.DrawText(MyOffsetCanvas, fonts['c64_6'], 4, 62,
-                          GRAY, thetmpoutside)
+                          GRAY, thewind)
 
     graphics.DrawText(MyOffsetCanvas, fonts['c64_7'], 7, 27, GREEN,
                       thedate)
